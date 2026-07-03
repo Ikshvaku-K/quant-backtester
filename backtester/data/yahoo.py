@@ -3,6 +3,7 @@ local CSV cache so backtests are reproducible offline after the first run.
 """
 
 import os
+import re
 
 import numpy as np
 import pandas as pd
@@ -36,7 +37,13 @@ class YahooDataHandler(DataHandler):
 
     def _cache_path(self, symbol):
         os.makedirs(self.cache_dir, exist_ok=True)
-        fname = f"{symbol}_{self.start_date}_{self.end_date}.csv"
+        # Sanitize the symbol before putting it in a filename: a raw value
+        # like "../../foo" would otherwise let the cache file escape cache_dir
+        # (path traversal) if symbols ever came from untrusted input.
+        safe_symbol = re.sub(r"[^A-Za-z0-9._-]", "_", symbol).lstrip(".")
+        if not safe_symbol:
+            raise ValueError(f"Symbol {symbol!r} has no filesystem-safe characters.")
+        fname = f"{safe_symbol}_{self.start_date}_{self.end_date}.csv"
         return os.path.join(self.cache_dir, fname)
 
     def _load_data(self):

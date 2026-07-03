@@ -6,3 +6,4 @@ venv/
 data_cache/
 *.png
 .DS_Store
+REVIEW_LOCAL.md

@@ -123,6 +123,10 @@ class Portfolio:
         )
 
     def create_equity_curve_dataframe(self):
+        if not self.all_holdings:
+            raise ValueError(
+                "No bars were processed — check the symbol and date range."
+            )
         curve = pd.DataFrame(self.all_holdings)
         curve.set_index("datetime", inplace=True)
         curve["returns"] = curve["total"].pct_change().fillna(0.0)
